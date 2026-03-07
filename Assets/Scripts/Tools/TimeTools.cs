@@ -1,4 +1,4 @@
-public static class TimeHelper
+public static class TimeTools
 {
     public static string FormatElapsed(long ms)
     {
