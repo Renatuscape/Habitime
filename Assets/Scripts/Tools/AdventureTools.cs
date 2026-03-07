@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class AdventureTools
 {
-    public const double BASE_XP = 60000.0; // XP to reach level one
+    public const double BASE_XP = 450000.0; // XP to reach level one
     public const double MAX_LV_XP = 259200000.0; // Three days worth of XP
     public const int MAX_LEVEL = 100;
     public static double GROWTH; //= 1.1248;
