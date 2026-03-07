@@ -5,23 +5,23 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StopwatchUi : MonoBehaviour
+public class ClockUi : MonoBehaviour
 {
     public TextMeshProUGUI timeText;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI buttonText;
     public Button button;
-    StopwatchData stopwatch;
+    ClockData clockData;
 
-    public void Initialise(StopwatchData stopwatch)
+    public void Initialise(ClockData clockData)
     {
-        this.stopwatch = stopwatch;
+        this.clockData = clockData;
 
-        if (stopwatch != null)
+        if (clockData != null)
         {
-            nameText.text = stopwatch.name;
+            nameText.text = clockData.name;
 
-            if (stopwatch.hasStarted)
+            if (clockData.hasStarted)
             {
                 buttonText.text = "Stop";
                 StartCoroutine(UpdateLoop());
@@ -39,18 +39,16 @@ public class StopwatchUi : MonoBehaviour
 
     public void ButtonClick()
     {
-        Debug.Log("Button clicked");
-
-        if (stopwatch != null && stopwatch.hasStarted)
+        if (clockData != null && clockData.hasStarted)
         {
             StopAllCoroutines();
-            stopwatch.StopTimer();
+            ClockTools.StopTimer(clockData);
             buttonText.text = "Start";
             timeText.text = "00:00:00";
         }
-        else if (stopwatch != null && !stopwatch.hasStarted)
+        else if (clockData != null && !clockData.hasStarted)
         {
-            stopwatch.StartTimer();
+            ClockTools.StartTimer(clockData);
             buttonText.text = "Stop";
             StartCoroutine(UpdateLoop());
         }
@@ -60,10 +58,9 @@ public class StopwatchUi : MonoBehaviour
     {
         while (true)
         {
-            if (timeText != null && stopwatch != null)
+            if (timeText != null && clockData != null)
             {
-                Debug.Log("Coroutine called");
-                timeText.text = TimeHelper.FormatElapsed(stopwatch.GetTime());
+                timeText.text = TimeTools.FormatElapsed(ClockTools.GetTime(clockData));
             }
 
             yield return new WaitForSeconds(0.01f);
