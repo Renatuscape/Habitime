@@ -13,10 +13,12 @@ public class Notification : MonoBehaviour
     {
         var channel = new AndroidNotificationChannel()
         {
-            Id = "stopwatch_channel",
-            Name = "Stopwatch",
-            Importance = Importance.Default,
-            Description = "Shows stopwatch time"
+            Id = "habitime_channel",
+            Name = "Habitime",
+            Importance = Importance.Low,
+            EnableVibration = false,
+
+            Description = "Shows clock time"
         };
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
     }
@@ -38,11 +40,11 @@ public class Notification : MonoBehaviour
         AndroidNotificationCenter.CancelAllNotifications();
 
         var notification = new AndroidNotification();
-        notification.Title = "Stopwatch";
+        notification.Title = "Habitime";
         notification.Text = timeText;
         notification.FireTime = System.DateTime.Now;
         notification.SmallIcon = "default";
 
-        AndroidNotificationCenter.SendNotification(notification, "stopwatch_channel");
+        AndroidNotificationCenter.SendNotification(notification, "habitime_channel");
     }
 }
