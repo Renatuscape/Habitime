@@ -63,5 +63,6 @@
 #*.RTF   diff=astextplain
 
 Assets/Shaders/** linguist-vendored
+Assets/TextMesh Pro/** linguist-vendored
 *.shader linguist-vendored
 *.hlsl linguist-vendored
