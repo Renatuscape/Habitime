@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
 public class PlayerData
 {
-    public List<StopwatchData> watches = new();
-    public List<WatchArchiveData> watchArchive = new();
+    public List<ClockData> watches = new();
+    public List<ClockArchiveData> watchArchive = new();
+    public List<AdventurerData> adventurers = new();
+    public bool disableAdventureMode;
 }
