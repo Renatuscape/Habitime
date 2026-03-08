@@ -16,15 +16,35 @@ public static class ClockTools
         clock.hasStarted = false;
 
         // Move to archive
+        clock.life = 0;
         clock.endTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        DataTools.ArchiveStopwatch(clock);
-        clock.endTimestamp = 0;
-        clock.id = DataTools.playerData.watches.Count + DataTools.playerData.watchArchive.Count;
+        DataTools.ArchiveClock(clock);
+
+        if (DataTools.playerData.watches.Count > 0)
+        {
+            CanvasController.LoadClock(DataTools.playerData.watches[0]);
+        }
+        else
+        {
+            DataTools.playerData.activeClock = null;
+            CanvasController.OpenCreateMenu();
+        }
     }
 
     public static long GetTime(ClockData clock)
     {
         if (!clock.hasStarted) return clock.endTimestamp - clock.startTimestamp;
         return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - clock.startTimestamp;
+    }
+
+    public static ClockData CreateClock(string name = "Timer", int life = 1)
+    {
+        ClockData clock = new();
+        clock.name = name;
+        clock.life = life;
+
+        DataTools.CreateAdventurer(clock);
+
+        return clock;
     }
 }
