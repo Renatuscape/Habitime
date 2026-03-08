@@ -6,15 +6,18 @@ using UnityEngine;
 [Serializable]
 public class ClockData
 {
-    public ClockData(int id, string name)
-    {
-        this.id = id;
-        this.name = name;
-    }
-
     public int id;
+    public int life = 1;
     public string name;
     public bool hasStarted;
+    public bool isSimple = true;
     public long startTimestamp;
     public long endTimestamp;
+    public List<Goal> goals = new();
+}
+
+[Serializable]
+public class Goal
+{
+    public string text;
 }
