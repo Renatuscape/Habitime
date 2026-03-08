@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using UnityEngine;
 
 public class MainController : MonoBehaviour
@@ -9,29 +8,27 @@ public class MainController : MonoBehaviour
     public static MainController main;
     public Notification notification;
     public PlayerData dummyData;
-    public ClockData stopwatch;
-    public ClockUi stopwatchUi;
+    public CanvasController canvasController;
 
     private void Awake()
     {
         main = GetComponent<MainController>();
-        AdventureTools.GROWTH = AdventureTools.SolveGrowthRate();
+        //AdventureTools.GROWTH = AdventureTools.SolveGrowthRate();
     }
 
     void Start()
     {
         DataTools.LoadData();
         dummyData = DataTools.playerData;
-        stopwatch = DataTools.playerData.watches[0];
 
-        stopwatchUi.Initialise(stopwatch);
+        canvasController.Initialise();
     }
     void OnApplicationPause(bool paused)
     {
         if (paused) // save your data here
         {
             DataTools.SaveData();
-            notification.SendStopwatchNotification(TimeTools.FormatNotification(ClockTools.GetTime(stopwatch), stopwatch.name));
+            notification.SendStopwatchNotification(TimeTools.FormatNotification(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeClock.name));
         }
 }
 
