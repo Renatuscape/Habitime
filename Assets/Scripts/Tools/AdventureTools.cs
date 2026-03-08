@@ -5,43 +5,56 @@ using UnityEngine;
 
 public static class AdventureTools
 {
-    public const double BASE_XP = 450000.0; // XP to reach level one
-    public const double MAX_LV_XP = 259200000.0; // Three days worth of XP
+    public const double BASE_XP = 450000.0;
+    public const double MAX_LV_XP = 259200000.0;
     public const int MAX_LEVEL = 100;
-    public static double GROWTH; //= 1.1248;
+    public static double GROWTH;
+    public static double STEP;
+
+    private static long ApplyBonus(long ms)
+    {
+        if (DataTools.playerData?.activeAdventurer != null)
+            ms += DataTools.playerData.activeAdventurer.bonusXP;
+        return ms;
+    }
+
+    private static int GetLevelRaw(long ms)
+    {
+        if (ms <= 0) return 0;
+        int level = 0;
+        while (level < MAX_LEVEL && ms >= XpForLevel(level + 1))
+            level++;
+        return level;
+    }
 
     public static int GetLevel(long ms)
     {
-        if (ms <= 0) return 0;
-        // inverse of the exponential formula
-        int level = (int)(Math.Log((ms / BASE_XP) + 1) / Math.Log(GROWTH));
-        return Math.Min(level, MAX_LEVEL);
+        return GetLevelRaw(ApplyBonus(ms));
     }
 
     public static double XpForLevel(int level)
     {
-        return BASE_XP * (Math.Pow(GROWTH, level) - 1);
+        return BASE_XP * level + STEP * (level * (level - 1) / 2.0);
     }
 
     public static float GetLevelProgress(long ms)
     {
-        int level = GetLevel(ms);
+        ms = ApplyBonus(ms);
+        int level = GetLevelRaw(ms);
         if (level >= MAX_LEVEL) return 1f;
-
         double currentLevelXp = XpForLevel(level);
         double nextLevelXp = XpForLevel(level + 1);
-
         return (float)((ms - currentLevelXp) / (nextLevelXp - currentLevelXp));
     }
 
-    public static double SolveGrowthRate()
+    public static double SolveStep()
     {
-        double low = 1.0, high = 2.0;
+        double low = 0, high = MAX_LV_XP;
         for (int i = 0; i < 1000; i++)
         {
             double mid = (low + high) / 2;
-            double total = BASE_XP * (Math.Pow(mid, MAX_LEVEL) - 1);
-            if (total < MAX_LV_XP) low = mid;
+            STEP = mid;
+            if (XpForLevel(MAX_LEVEL) < MAX_LV_XP) low = mid;
             else high = mid;
         }
         return (low + high) / 2;
