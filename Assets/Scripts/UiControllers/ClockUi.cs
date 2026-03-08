@@ -11,17 +11,18 @@ public class ClockUi : MonoBehaviour
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI buttonText;
     public Button button;
-    ClockData clockData;
+    public ClockData clock;
 
-    public void Initialise(ClockData clockData)
+    public void Initialise()
     {
-        this.clockData = clockData;
+        clock = DataTools.playerData.activeClock;
 
-        if (clockData != null)
+        if (clock != null && DataTools.playerData.watches.Count > 0)
         {
-            nameText.text = clockData.name;
+            button.gameObject.SetActive(true);
+            nameText.text = clock.name;
 
-            if (clockData.hasStarted)
+            if (clock.hasStarted)
             {
                 buttonText.text = "Stop";
                 StartCoroutine(UpdateLoop());
@@ -32,23 +33,28 @@ public class ClockUi : MonoBehaviour
                 timeText.text = "00:00:00";
             }
         }
+        else
+        {
+            button.gameObject.SetActive(false);
+            timeText.text = "Create Clock to Start";
+        }
 
-        button.onClick.RemoveAllListeners();
+            button.onClick.RemoveAllListeners();
         button.onClick.AddListener(() => ButtonClick());
     }
 
     public void ButtonClick()
     {
-        if (clockData != null && clockData.hasStarted)
+        if (clock != null && clock.hasStarted)
         {
             StopAllCoroutines();
-            ClockTools.StopTimer(clockData);
+            ClockTools.StopTimer(clock);
             buttonText.text = "Start";
             timeText.text = "00:00:00";
         }
-        else if (clockData != null && !clockData.hasStarted)
+        else if (clock != null && !clock.hasStarted)
         {
-            ClockTools.StartTimer(clockData);
+            ClockTools.StartTimer(clock);
             buttonText.text = "Stop";
             StartCoroutine(UpdateLoop());
         }
@@ -58,9 +64,9 @@ public class ClockUi : MonoBehaviour
     {
         while (true)
         {
-            if (timeText != null && clockData != null)
+            if (timeText != null && clock != null)
             {
-                timeText.text = TimeTools.FormatElapsed(ClockTools.GetTime(clockData));
+                timeText.text = TimeTools.FormatElapsed(ClockTools.GetTime(clock));
             }
 
             yield return new WaitForSeconds(0.01f);
