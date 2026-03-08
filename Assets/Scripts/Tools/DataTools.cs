@@ -1,46 +1,57 @@
+
 using UnityEngine;
 
 public static class DataTools
 {
     public static PlayerData playerData;
-    public static ClockData activeClock;
-    public static AdventurerData activeAdventurer;
-    public static void ArchiveStopwatch(ClockData watchData)
+    public static void ArchiveClock(ClockData watchData)
     {
         playerData.watchArchive.Add(new(watchData));
+        playerData.watches.Remove(watchData);
+
         SaveData();
     }
 
     public static void SaveData()
     {
-        string json = PlayerPrefs.GetString("PlayerData", "");
-        json = JsonUtility.ToJson(playerData);
-        PlayerPrefs.SetString("PlayerData", json);
-        PlayerPrefs.Save();
-        Debug.Log(json);
+        if (playerData.activeClock != null)
+        {
+            string json = PlayerPrefs.GetString("PlayerData", "");
+            json = JsonUtility.ToJson(playerData);
+            PlayerPrefs.SetString("PlayerData", json);
+            PlayerPrefs.Save();
+            Debug.Log(json);
+        }
+        else
+        {
+            Debug.Log("No data created, no data saved.");
+        }
     }
 
-    public static ClockData CreateData()
+    public static void CreateNewGameData()
     {
         playerData = new PlayerData();
-        ClockData stopwatch = CreateTimer("Silence");
-        return stopwatch;
     }
 
-    public static ClockData CreateTimer(string name)
+    public static void StoreClock(ClockData clock)
     {
-        ClockData stopwatch = new(playerData.watches.Count + playerData.watchArchive.Count, name);
-        playerData.watches.Add(stopwatch);
-
+        clock.id = playerData.watches.Count + playerData.watchArchive.Count;
+        playerData.watches.Add(clock);
         SaveData();
-        return stopwatch;
     }
 
-    public static AdventurerData CreateAdventurer(ClockData stopwatch)
+    public static AdventurerData CreateAdventurer(ClockData clock)
     {
         AdventurerData adventurer = new();
-        adventurer.clockId = stopwatch.id;
+        adventurer.name = "Hero of " + clock.name;
+        adventurer.clockId = clock.id;
+        adventurer.templateId = Codex.adventurerTemplates[0].id;
         playerData.adventurers.Add(adventurer);
+
+        if (playerData.activeClock.id == clock.id)
+        {
+            playerData.activeAdventurer = adventurer;
+        }
 
         return adventurer;
     }
@@ -51,14 +62,12 @@ public static class DataTools
 
         if (json is null || json == "")
         {
-            CreateData();
+            CreateNewGameData();
         }
         else
         {
             playerData = JsonUtility.FromJson<PlayerData>(json);
             Debug.Log(json);
         }
-
-        activeClock = playerData.watches[0];
     }
 }
