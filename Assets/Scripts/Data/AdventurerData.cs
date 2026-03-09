@@ -8,4 +8,5 @@ public class AdventurerData
     public string name;
     public bool isDead;
     public int bonusXP;
+    public int prestige; // Times advanced
 }
