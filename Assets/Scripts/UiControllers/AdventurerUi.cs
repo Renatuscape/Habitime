@@ -25,7 +25,7 @@ public class AdventurerUi : MonoBehaviour
             AnimatorTool.JumpObject(btAdventurer.gameObject, 5, 0.2f);
             if (DataTools.playerData?.activeAdventurer != null)
             {
-                int xp = 10000 - (100 * AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock)));
+                int xp = 5100 - (50 * AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock)));
                 DataTools.playerData.activeAdventurer.bonusXP += xp;
                 Debug.Log("XP added: " + xp + ". Total is " + AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock)));
             }
@@ -80,7 +80,8 @@ public class AdventurerUi : MonoBehaviour
                 prevText = levelText.text;
             }
 
-            if (DataTools.playerData.activeClock.hasStarted && !DataTools.playerData.activeAdventurer.isDead)
+            if (DataTools.playerData.activeClock.hasStarted // || character has reached max level)
+            && !DataTools.playerData.activeAdventurer.isDead)
             {
                 xpProgress.value = AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock));
                 xpProgress.gameObject.SetActive(true);
@@ -116,4 +117,7 @@ public class AdventurerUi : MonoBehaviour
             DataTools.playerData.activeAdventurer.isDead = true;
         }
     }
+
+    // Gesture - swipe left or right
+    // Scroll adventurers
 }
