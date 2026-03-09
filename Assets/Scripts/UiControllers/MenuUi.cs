@@ -70,4 +70,10 @@ public class MenuUi : MonoBehaviour
     {
         CanvasController.OpenCreateMenu();
     }
+
+    // Gesture - swipe down on menu
+    // Close menu on swipe down
+
+    // Gesture - swipe left or right
+    // Change to next clock
 }

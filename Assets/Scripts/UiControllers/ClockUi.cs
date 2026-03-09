@@ -72,4 +72,7 @@ public class ClockUi : MonoBehaviour
             yield return new WaitForSeconds(0.01f);
         }
     }
+
+    // Gesture -  Swipe down on clock / Click on clock
+    // Open clock edit screen
 }
