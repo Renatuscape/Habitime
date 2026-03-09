@@ -25,9 +25,9 @@ public class AdventurerUi : MonoBehaviour
             AnimatorTool.JumpObject(btAdventurer.gameObject, 5, 0.2f);
             if (DataTools.playerData?.activeAdventurer != null)
             {
-                int xp = 5100 - (50 * AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock)));
+                int xp = 5100 - (50 * AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer));
                 DataTools.playerData.activeAdventurer.bonusXP += xp;
-                Debug.Log("XP added: " + xp + ". Total is " + AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock)));
+                Debug.Log("XP added: " + xp + ". Total is " + AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer));
             }
         }
     }
@@ -71,7 +71,7 @@ public class AdventurerUi : MonoBehaviour
         {
             CheckCurrentAdventurer();
 
-            levelText.text = "Lv. " + AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock));
+            levelText.text = "Lv. " + AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer);
 
             if (levelText.text != prevText)
             {
@@ -83,7 +83,7 @@ public class AdventurerUi : MonoBehaviour
             if (DataTools.playerData.activeClock.hasStarted // || character has reached max level)
             && !DataTools.playerData.activeAdventurer.isDead)
             {
-                xpProgress.value = AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock));
+                xpProgress.value = AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer);
                 xpProgress.gameObject.SetActive(true);
             }
             else
