@@ -5,9 +5,9 @@ using UnityEngine;
 
 public static class AdventureTools
 {
-    public const double BASE_XP = 450000.0;
-    public const double MAX_LV_XP = 259200000.0;
-    public const int MAX_LEVEL = 100;
+    public static double BASE_XP = 450000.0;
+    public static double MAX_LV_XP = 259200000.0;
+    public static int MAX_LEVEL = 100;
     public static double GROWTH;
     public static double STEP;
 
@@ -27,13 +27,32 @@ public static class AdventureTools
         return level;
     }
 
-    public static int GetLevel(long ms)
+    public static void GetXpRange(AdventurerData adventurer){
+        AdventurerTemplate template;
+        
+        if (Codex.adventurerTemplates == null || Codex.adventurerTemplates.Length < 1){
+            template = new(){xpBase = 450000 xpCap = 259200000.0};
+        }
+        else if (adventurer == null){
+            template = Codex.adventurerTemplates[0];
+        }
+        else{
+        template = Codex.adventurerTemplates.FirstOrDefault((t) => t.id == adventurer.templateId);
+        }
+
+        MAX_LV_XP = template.xpCap;
+        BASE_XP = template.xpBase;
+    }
+
+    public static int GetLevel(long ms, AdventurerData adventurer)
     {
+        GetXpRange(adventurer);
         return GetLevelRaw(ApplyBonus(ms));
     }
 
-    public static double XpForLevel(int level)
+    public static double XpForLevel(int level, AdventurerData adventurer)
     {
+        GetXpRange(adventurer);
         return BASE_XP * level + STEP * (level * (level - 1) / 2.0);
     }
 
@@ -47,14 +66,15 @@ public static class AdventureTools
         return (float)((ms - currentLevelXp) / (nextLevelXp - currentLevelXp));
     }
 
-    public static double SolveStep()
+    public static double SolveStep(AdventurerData adventurer)
     {
+        GetXpRange(adventurer);
         double low = 0, high = MAX_LV_XP;
         for (int i = 0; i < 1000; i++)
         {
             double mid = (low + high) / 2;
             STEP = mid;
-            if (XpForLevel(MAX_LEVEL) < MAX_LV_XP) low = mid;
+            if (XpForLevel(MAX_LEVEL, adventurer) < MAX_LV_XP) low = mid;
             else high = mid;
         }
         return (low + high) / 2;
