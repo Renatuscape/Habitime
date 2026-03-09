@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class AdventureTools
@@ -18,11 +19,11 @@ public static class AdventureTools
         return ms;
     }
 
-    private static int GetLevelRaw(long ms)
+    private static int GetLevelRaw(long ms, AdventurerData adventurer)
     {
         if (ms <= 0) return 0;
         int level = 0;
-        while (level < MAX_LEVEL && ms >= XpForLevel(level + 1))
+        while (level < MAX_LEVEL && ms >= XpForLevel(level + 1, adventurer))
             level++;
         return level;
     }
@@ -31,7 +32,7 @@ public static class AdventureTools
         AdventurerTemplate template;
         
         if (Codex.adventurerTemplates == null || Codex.adventurerTemplates.Length < 1){
-            template = new(){xpBase = 450000 xpCap = 259200000.0};
+            template = new(){xpBase = 450000, xpCap = 259200000.0};
         }
         else if (adventurer == null){
             template = Codex.adventurerTemplates[0];
@@ -47,7 +48,7 @@ public static class AdventureTools
     public static int GetLevel(long ms, AdventurerData adventurer)
     {
         GetXpRange(adventurer);
-        return GetLevelRaw(ApplyBonus(ms));
+        return GetLevelRaw(ApplyBonus(ms), adventurer);
     }
 
     public static double XpForLevel(int level, AdventurerData adventurer)
@@ -56,13 +57,13 @@ public static class AdventureTools
         return BASE_XP * level + STEP * (level * (level - 1) / 2.0);
     }
 
-    public static float GetLevelProgress(long ms)
+    public static float GetLevelProgress(long ms, AdventurerData adventurer)
     {
         ms = ApplyBonus(ms);
-        int level = GetLevelRaw(ms);
+        int level = GetLevelRaw(ms, adventurer);
         if (level >= MAX_LEVEL) return 1f;
-        double currentLevelXp = XpForLevel(level);
-        double nextLevelXp = XpForLevel(level + 1);
+        double currentLevelXp = XpForLevel(level, adventurer);
+        double nextLevelXp = XpForLevel(level + 1, adventurer);
         return (float)((ms - currentLevelXp) / (nextLevelXp - currentLevelXp));
     }
 
