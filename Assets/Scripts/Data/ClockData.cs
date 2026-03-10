@@ -14,6 +14,8 @@ public class ClockData
     public long startTimestamp;
     public long endTimestamp;
     public List<Goal> goals = new();
+    public List<AdventurerData> adventurers = new();
+    public AdventurerData activeAdventurer;
 }
 
 [Serializable]
