@@ -8,39 +8,81 @@ using UnityEngine.UI;
 
 public class AdventurerUi : MonoBehaviour
 {
-    public TextMeshProUGUI levelText;
+    public TextMeshProUGUI adventurerLevel;
+    public TextMeshProUGUI adventurerName;
     public Button btAdventurer;
     public Slider xpProgress;
+    public AdventurerData adventurer;
     bool isActive;
+    bool isClickCooldown;
 
     private void OnEnable()
     {
         StartCoroutine(AdventureChecker());
     }
 
+    public void LoadAdventurer(AdventurerData adventurer)
+    {
+        this.adventurer = adventurer;
+        adventurerName.text = adventurer.name;
+        StopAllCoroutines();
+        //StartCoroutine(AdventureChecker());
+
+        if (DataTools.playerData != null && DataTools.playerData.disableAdventureMode)
+        {
+            gameObject.SetActive(false);
+        }
+        else if (DataTools.playerData?.activeClock != null && adventurerLevel != null)
+        {
+            CheckCurrentAdventurer();
+            StartCoroutine(UpdateLoop());
+
+            if (btAdventurer != null)
+            {
+                btAdventurer.onClick.RemoveAllListeners();
+                btAdventurer.onClick.AddListener(() => ClickAdventurer());
+            }
+
+        }
+    }
+
     public void ClickAdventurer()
     {
-        if (DataTools.playerData.activeClock.hasStarted)
+        if (!isClickCooldown)
         {
-            AnimatorTool.JumpObject(btAdventurer.gameObject, 5, 0.2f);
-            if (DataTools.playerData?.activeAdventurer != null)
+            isClickCooldown = true;
+            if (DataTools.playerData.activeClock.hasStarted
+                && !DataTools.playerData.activeClock.activeAdventurer.isMaxed
+                && !DataTools.playerData.activeClock.activeAdventurer.isDead)
             {
-                int xp = 5100 - (50 * AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer));
-                DataTools.playerData.activeAdventurer.bonusXP += xp;
-                Debug.Log("XP added: " + xp + ". Total is " + AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer));
+                AnimatorTool.JumpObject(btAdventurer.gameObject, 5, 0.2f);
+                if (adventurer != null)
+                {
+                    int xp = 10000;// - (195 * AdventureTools.GetLevel(adventurer));
+                    adventurer.bonusXP += xp;
+                    Debug.Log("XP added: " + xp + ". Total is " + AdventureTools.GetLevelProgress(adventurer));
+                }
             }
         }
+
+        StartCoroutine(ClickCooldown());
+    }
+    IEnumerator ClickCooldown()
+    {
+        yield return new WaitForSeconds(0.1f);
+        isClickCooldown = false;
     }
 
     IEnumerator AdventureChecker()
     {
+        Debug.Log("Starting Adventure Checker coroutine");
         while (true)
         {
             if (DataTools.playerData != null && DataTools.playerData.disableAdventureMode)
             {
                 gameObject.SetActive(false);
             }
-            else if (!isActive && DataTools.playerData?.activeClock != null && levelText != null)
+            else if (!isActive && DataTools.playerData?.activeClock != null && adventurerLevel != null)
             {
                 CheckCurrentAdventurer();
                 isActive = true;
@@ -65,25 +107,33 @@ public class AdventurerUi : MonoBehaviour
 
     IEnumerator UpdateLoop()
     {
-        string prevText = levelText.text;
+        Debug.Log("Starting adventurer Update Loop coroutine");
+        string prevText = adventurerLevel.text;
 
         while (true)
         {
             CheckCurrentAdventurer();
 
-            levelText.text = "Lv. " + AdventureTools.GetLevel(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer);
+            int level = AdventureTools.GetLevel(adventurer);
+            adventurerLevel.text = "Lv. " + level;
 
-            if (levelText.text != prevText)
+            if (level >= adventurer.template.maxLevel)
             {
-                AnimatorTool.JumpObject(levelText.gameObject, 30, 0.1f);
-                AnimatorTool.JumpObject(xpProgress.gameObject, 20, 0.05f);
-                prevText = levelText.text;
+                xpProgress.gameObject.SetActive(false);
             }
 
-            if (DataTools.playerData.activeClock.hasStarted // || character has reached max level)
-            && !DataTools.playerData.activeAdventurer.isDead)
+            if (adventurerLevel.text != prevText)
             {
-                xpProgress.value = AdventureTools.GetLevelProgress(ClockTools.GetTime(DataTools.playerData.activeClock), DataTools.playerData.activeAdventurer);
+                AnimatorTool.JumpObject(adventurerLevel.gameObject, 30, 0.1f);
+                AnimatorTool.JumpObject(xpProgress.gameObject, 20, 0.05f);
+                prevText = adventurerLevel.text;
+            }
+
+            if (DataTools.playerData.activeClock.hasStarted
+            && !adventurer.isDead
+            && level < adventurer.template.maxLevel)
+            {
+                xpProgress.value = AdventureTools.GetLevelProgress(adventurer);
                 xpProgress.gameObject.SetActive(true);
             }
             else
@@ -91,30 +141,30 @@ public class AdventurerUi : MonoBehaviour
                 xpProgress.gameObject.SetActive(false);
             }
 
-            yield return new WaitForSeconds(1.00f);
+            yield return new WaitForSeconds(0.20f);
         }
     }
 
 
     public void CheckCurrentAdventurer()
     {
-        if (DataTools.playerData.activeAdventurer == null || DataTools.playerData.activeClock.id != DataTools.playerData.activeAdventurer?.clockId)
+        if (adventurer == null || DataTools.playerData.activeClock.id != adventurer.clockId)
         {
-            AdventurerData matchingAdventurer = DataTools.playerData.adventurers.FirstOrDefault(a => a.clockId == DataTools.playerData.activeClock.id);
+            AdventurerData matchingAdventurer = DataTools.playerData.activeClock.adventurers.FirstOrDefault(a => a.clockId == DataTools.playerData.activeClock.id);
 
             if (matchingAdventurer != null)
             {
-                DataTools.playerData.activeAdventurer = matchingAdventurer;
+                adventurer = matchingAdventurer;
             }
             else
             {
-                DataTools.playerData.activeAdventurer = DataTools.CreateAdventurer(DataTools.playerData.activeClock);
+                gameObject.SetActive(false);
             }
         }
-        else if (DataTools.playerData.activeClock.id == DataTools.playerData.activeAdventurer.clockId
+        else if (DataTools.playerData.activeClock.id == adventurer.clockId
             && DataTools.playerData.activeClock.life <= 0)
         {
-            DataTools.playerData.activeAdventurer.isDead = true;
+            adventurer.isDead = true;
         }
     }
 
