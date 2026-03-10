@@ -23,8 +23,12 @@ public static class AnimatorTool
         float targetY = startPos.y + (rt.rect.height * (jumpMagnitude / 100f));
         Vector2 topPos = new Vector2(startPos.x, targetY);
 
-        Coroutine c = mb.StartCoroutine(BounceCoroutine(rt, startPos, topPos, duration));
-        _activeCoroutines[go] = (c, startPos);
+
+        if (go.activeInHierarchy)
+        {
+            Coroutine c = mb.StartCoroutine(BounceCoroutine(rt, startPos, topPos, duration));
+            _activeCoroutines[go] = (c, startPos);
+        }
     }
 
     private static IEnumerator BounceCoroutine(RectTransform rt, Vector2 startPos, Vector2 topPos, float duration)
