@@ -1,9 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,21 +12,26 @@ public class CanvasController : MonoBehaviour
     public MenuUi menuUi;               // Upper level. Click-through to menu button
     public CreateClockUi createClockUi; // Top level. No click-through
     public CreateAdventurerUi createAdventurerUi;
+    public AdventurerArchiveUi adventurerArchiveUi;
     public Button btCreateAdventurer;
+    public Button btPromoteAdventurer;
+    public Button btAdventurerArchive;
+    public Button btSettings;
+    public Button btMenu;
     private void Awake()
     {
         instance = this;
         btCreateAdventurer.onClick.AddListener(() => OpenCreateAdventurer());
+        btMenu.onClick.AddListener(() => BtnToggleMenu());
+        btAdventurerArchive.onClick.AddListener(() => ToggleAdventureArchiveAndLoad());
     }
     public void Initialise()
     {
+        HideAllUiElements();
+
         if (DataTools.playerData.activeClock != null)
         {
-            adventurerUi.gameObject.SetActive(false);
-            createClockUi.gameObject.SetActive(false);
-            menuUi.gameObject.SetActive(false);
             LoadClockUi();
-            //adventurerUi.CheckCurrentAdventurer();
         }
         else
         {
@@ -41,22 +42,27 @@ public class CanvasController : MonoBehaviour
     public void BtnToggleMenu()
     {
         menuUi.ToggleMenu(!menuUi.gameObject.activeInHierarchy);
+
+        if (menuUi.gameObject.activeInHierarchy)
+        {
+            btCreateAdventurer.gameObject.SetActive(false);
+        }
+        else
+        {
+            LoadClockUi();
+        }
     }
 
     public void OpenCreateAdventurer()
     {
-        btCreateAdventurer.gameObject.SetActive(false);
-        createClockUi.gameObject.SetActive(false);
-        menuUi.gameObject.SetActive(false);
-        clockUi.gameObject.SetActive(false);
-        adventurerUi.gameObject.SetActive(false);
+        HideAllUiElements();
         createAdventurerUi.Initialise();
     }
 
     void LoadClockUi()
     {
+        HideAllUiElements();
         clockUi.gameObject.SetActive(true);
-        createAdventurerUi.gameObject.SetActive(false);
         clockUi.Initialise();
 
         if (DataTools.playerData.disableAdventureMode)
@@ -71,10 +77,8 @@ public class CanvasController : MonoBehaviour
 
     void OpenCreateClock()
     {
+        HideAllUiElements();
         createClockUi.gameObject.SetActive(true);
-        menuUi.gameObject.SetActive(false);
-        clockUi.gameObject.SetActive(false);
-        adventurerUi.gameObject.SetActive(false);
     }
 
     void CheckAdventurer()
@@ -87,7 +91,7 @@ public class CanvasController : MonoBehaviour
             {
                 clock.activeAdventurer = null;
                 adventurerUi.gameObject.SetActive(false);
-                btCreateAdventurer.gameObject.SetActive(true);
+                TryEnableAdventurerButtons();
             }
             else
             {
@@ -98,7 +102,7 @@ public class CanvasController : MonoBehaviour
                     if (clock.activeAdventurer == null)
                     {
                         adventurerUi.gameObject.SetActive(false);
-                        btCreateAdventurer.gameObject.SetActive(true);
+                        TryEnableAdventurerButtons();
                         return;
                     }
                 }
@@ -112,8 +116,8 @@ public class CanvasController : MonoBehaviour
                     {
                         clock.activeAdventurer.isMaxed = true;
                         clock.activeAdventurer.endTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                            }
-                    btCreateAdventurer.gameObject.SetActive(true);
+                    }
+                    TryEnableAdventurerButtons();
                 }
                 else
                 {
@@ -127,6 +131,45 @@ public class CanvasController : MonoBehaviour
         }
     }
 
+    void TryEnableAdventurerButtons()
+    {
+        if (menuUi.gameObject.activeInHierarchy)
+        {
+            btCreateAdventurer.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.Log("Toggle method turned on create adventurer button. Menu was active: " + menuUi.gameObject.activeInHierarchy);
+            btCreateAdventurer.gameObject.SetActive(true);
+
+            // Check if promotion button should be available here
+        }
+    }
+
+    void ToggleAdventureArchiveAndLoad()
+    {
+        if (adventurerArchiveUi.gameObject.activeInHierarchy)
+        {
+            LoadClock(DataTools.playerData.activeClock);
+        }
+        else
+        {
+            HideAllUiElements();
+            adventurerArchiveUi.Initialise(DataTools.playerData.activeClock);
+        }
+    }
+
+    void HideAllUiElements()
+    {
+        btPromoteAdventurer.gameObject.SetActive(false);
+        btCreateAdventurer.gameObject.SetActive(false);
+        adventurerArchiveUi.gameObject.SetActive(false);
+        adventurerUi.gameObject.SetActive(false);
+        createClockUi.gameObject.SetActive(false);
+        clockUi.gameObject.SetActive(false);
+        menuUi.gameObject.SetActive(false);
+    }
+
     public static void LoadClock(ClockData clock)
     {
         DataTools.playerData.activeClock = clock;
@@ -136,5 +179,10 @@ public class CanvasController : MonoBehaviour
     public static void OpenCreateClockMenu()
     {
         instance.OpenCreateClock();
+    }
+
+    public static void ToggleAdventureArchive()
+    {
+        instance.ToggleAdventureArchiveAndLoad();
     }
 }
