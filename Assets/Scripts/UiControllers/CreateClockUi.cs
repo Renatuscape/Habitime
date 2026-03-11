@@ -49,7 +49,7 @@ public class CreateClockUi : MonoBehaviour
 
         if (DataTools.playerData == null)
         {
-            DataTools.CreateNewGameData();
+            DataTools.playerData = new PlayerData();
         }
 
         var clock = ClockTools.CreateClock(nameInput.text, (int)lifeSlider.value);
