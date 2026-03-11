@@ -3,6 +3,7 @@ using System;
 [Serializable]
 public class AdventurerData
 {
+    public string id;      // Unique ID
     public int clockId; // Relevant clock
     public AdventurerTemplate template;
     public string name;
