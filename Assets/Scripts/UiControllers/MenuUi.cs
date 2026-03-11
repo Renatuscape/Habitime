@@ -68,7 +68,7 @@ public class MenuUi : MonoBehaviour
 
     public void CreateNewClock()
     {
-        CanvasController.OpenCreateMenu();
+        CanvasController.OpenCreateClockMenu();
     }
 
     // Gesture - swipe down on menu
