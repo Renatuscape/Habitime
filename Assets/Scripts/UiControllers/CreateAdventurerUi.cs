@@ -38,11 +38,12 @@ public class CreateAdventurerUi : MonoBehaviour
     public void CreateAdventurer()
     {
         ClockData clock = DataTools.playerData?.activeClock;
-        AdventurerData adventurer = new() { name = nameInput.text, template = selectedTemplate };
 
         if (clock != null)
         {
-            clock.activeAdventurer = DataTools.CreateAdventurer(clock, adventurer);
+            AdventurerData adventurer = new() { name = nameInput.text, template = selectedTemplate };
+            clock.activeAdventurer = DataTools.FinishAndSaveAdventurer(clock, adventurer);
+
             CanvasController.LoadClock(DataTools.playerData.activeClock);
             gameObject.SetActive(false);
         }
@@ -56,7 +57,7 @@ public class CreateAdventurerUi : MonoBehaviour
     public void OnSwapTemplate(bool isRight)
     {
         int indexMod = isRight ? 1 : -1;
-        int currentIndex = System.Array.IndexOf(Codex.adventurerTemplates, selectedTemplate);
+        int currentIndex = Array.IndexOf(Codex.adventurerTemplates, selectedTemplate);
 
         int count = DataTools.playerData.watches.Count;
         int newIndex = (currentIndex + indexMod + count) % count;
