@@ -42,7 +42,7 @@ public static class DataTools
         SaveData();
     }
 
-    public static AdventurerData CreateAdventurer(ClockData clock, AdventurerData adventurer)
+    public static AdventurerData FinishAndSaveAdventurer(ClockData clock, AdventurerData adventurer)
     {
         if (adventurer.name.Length < 1)
         {
@@ -54,6 +54,12 @@ public static class DataTools
         }
 
         adventurer.clockId = clock.id;
+
+        string random = new string(Enumerable.Range(0, 3)
+            .Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[UnityEngine.Random.Range(0, 36)])
+            .ToArray());
+
+        adventurer.id = clock.id + "-" + clock.adventurers.Count + "-" + random;
         adventurer.startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         clock.adventurers.Add(adventurer);
 
@@ -81,6 +87,7 @@ public static class DataTools
     {
         foreach (var clock in playerData.watches)
         {
+            int i = 0;
             foreach (var adventurer in clock.adventurers)
             {
                 if (adventurer.template == null || adventurer.template.name.Length < 1)
@@ -108,6 +115,17 @@ public static class DataTools
                     Debug.Log("Adventurer timestamp missing. Setting endtime to current time.");
                     adventurer.endTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
+
+                if (adventurer.id == null || adventurer.id.Length < 1)
+                {
+                    string random = new string(Enumerable.Range(0, 3)
+                        .Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[UnityEngine.Random.Range(0, 36)])
+                        .ToArray());
+
+                    adventurer.id = clock.id + "-" + i + "-" + random;
+                }
+
+                i++;
             }
         }
     }
