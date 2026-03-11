@@ -1,4 +1,6 @@
 
+using System;
+using System.Linq;
 using UnityEngine;
 
 public static class DataTools
@@ -28,30 +30,32 @@ public static class DataTools
         }
     }
 
-    public static void CreateNewGameData()
-    {
-        playerData = new PlayerData();
-    }
-
     public static void StoreClock(ClockData clock)
     {
         clock.id = playerData.watches.Count + playerData.watchArchive.Count;
+        foreach (var adventurer in clock.adventurers)
+        {
+            adventurer.clockId = clock.id;
+        }
+
         playerData.watches.Add(clock);
         SaveData();
     }
 
-    public static AdventurerData CreateAdventurer(ClockData clock)
+    public static AdventurerData CreateAdventurer(ClockData clock, AdventurerData adventurer)
     {
-        AdventurerData adventurer = new();
-        adventurer.name = "Hero of " + clock.name;
-        adventurer.clockId = clock.id;
-        adventurer.templateId = Codex.adventurerTemplates[0].id;
-        playerData.adventurers.Add(adventurer);
-
-        if (playerData.activeClock.id == clock.id)
+        if (adventurer.name.Length < 1)
         {
-            playerData.activeAdventurer = adventurer;
+            adventurer.name = "Hero of " + clock.name;
         }
+        if (adventurer.template == null || adventurer.template.name.Length < 1)
+        {
+            adventurer.template = Codex.adventurerTemplates[0];
+        }
+
+        adventurer.clockId = clock.id;
+        adventurer.startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        clock.adventurers.Add(adventurer);
 
         return adventurer;
     }
@@ -62,12 +66,49 @@ public static class DataTools
 
         if (json is null || json == "")
         {
-            CreateNewGameData();
+            playerData = new PlayerData();
         }
         else
         {
             playerData = JsonUtility.FromJson<PlayerData>(json);
             Debug.Log(json);
+
+            CheckDataIntegrity(playerData);
+        }
+    }
+
+    static void CheckDataIntegrity(PlayerData playerData)
+    {
+        foreach (var clock in playerData.watches)
+        {
+            foreach (var adventurer in clock.adventurers)
+            {
+                if (adventurer.template == null || adventurer.template.name.Length < 1)
+                {
+                    Debug.Log("Adventurer missing template. Assigning default.");
+                    adventurer.template = Codex.adventurerTemplates[0];
+                }
+
+                if (adventurer.template.maxLevel == 0
+                    || adventurer.template.xpCap == 0
+                    || adventurer.template.xpBase == 0)
+                {
+                    Debug.Log("Adventurer template data missing. Refreshing data.");
+                    adventurer.template = Codex.adventurerTemplates.FirstOrDefault((t) => t.name == adventurer.template.name);
+                }
+
+                if (adventurer.startTimestamp == 0)
+                {
+                    Debug.Log("Adventurer timestamp missing. Setting starttime to current time.");
+                    adventurer.startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
+
+                if ((adventurer.isDead || adventurer.isMaxed) && adventurer.endTimestamp == 0)
+                {
+                    Debug.Log("Adventurer timestamp missing. Setting endtime to current time.");
+                    adventurer.endTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
+            }
         }
     }
 }
