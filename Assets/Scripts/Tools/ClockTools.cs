@@ -27,7 +27,7 @@ public static class ClockTools
         else
         {
             DataTools.playerData.activeClock = null;
-            CanvasController.OpenCreateMenu();
+            CanvasController.OpenCreateClockMenu();
         }
     }
 
@@ -42,8 +42,6 @@ public static class ClockTools
         ClockData clock = new();
         clock.name = name;
         clock.life = life;
-
-        DataTools.CreateAdventurer(clock);
 
         return clock;
     }
