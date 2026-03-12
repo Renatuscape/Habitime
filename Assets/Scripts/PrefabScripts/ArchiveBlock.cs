@@ -9,10 +9,11 @@ public class ArchiveBlock : MonoBehaviour
 {
     public List<SpriteContainer> spriteContainers;
 
-    public List<AdventurerData> Initialise(List<AdventurerData> adventurers)
+    public List<AdventurerData> Initialise(List<AdventurerData> adventurers, out int totalPrinted)
     {
         List<AdventurerData> leftovers = new();
 
+        totalPrinted = 0;
         int i;
 
         for (i = 0; i < adventurers.Count; i++)
@@ -23,6 +24,7 @@ public class ArchiveBlock : MonoBehaviour
             }
             else
             {
+                totalPrinted++;
                 SetUpSprite(adventurers[i], spriteContainers[i]);
             }
         }
